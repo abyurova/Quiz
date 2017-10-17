@@ -7,7 +7,9 @@
 //
 
 import UIKit
-//var resultArray : [String] = []
+import Alamofire
+import SwiftyJSON
+import NVActivityIndicatorView
 class ViewController: UIViewController, GoBackDelegate {
     
     @IBOutlet weak var label: UILabel!
@@ -17,12 +19,13 @@ class ViewController: UIViewController, GoBackDelegate {
     var correct : Int = 0
     var button = UIButton()
     let mySingleObject = Quiz.sharedInstance
-    
-   /* var arrOfQuestions: [Dictionary<String,Any>] = [["question":"2+2?","answer": ["2","4", "10", "7"], "correct": "4"], ["question":"2+3?","answer":["2","5","10"], "correct": "5"], ["question":"2+4?","answer":["3","6","15"], "correct": "6"]]*/
+     var newList: Array<Question> = []
+    //var activity : UIActivityIndicatorView = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadQuestions()
+            questFromAPI()
+        
     }
 
     func loadQuestions(){
@@ -37,11 +40,41 @@ class ViewController: UIViewController, GoBackDelegate {
         label.text = mySingleObject.questionList[indexOfQuestion].questionText
         a=0
     }
-
+    
+    func questFromAPI(){
+        
+        let activityIndicator = NVActivityIndicatorView(frame: CGRect(x: self.view.frame.width/2, y: self.view.frame.height/2,width: 60, height: 60), type: .ballClipRotate , color: UIColor.red, padding: 0)
+        
+        activityIndicator.startAnimating()
+        view.addSubview(activityIndicator)
+        APIManager.goToGoogle() {
+            (data) -> Void in
+            do{
+                let allQuestions = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments) as! [String : AnyObject]
+                if let arrJSON = allQuestions["questionList"] as? [[String: Any]] {
+                    print(arrJSON)
+                    for item in arrJSON{
+                         self.newList.append(Question(questionText: (item["questionText"] as! String),choiceList: (item["choiceList"] as! [String]),  correctAnswer: (item["correctAnswer"] as! String)))
+                    }
+                    for _ in 0..<5{
+                        let randomNum = Int(arc4random_uniform(7))
+                        self.mySingleObject.questionList.append(self.newList[randomNum])
+                    }
+                }
+            }
+            catch{
+                print("Some error")
+            }
+                    activityIndicator.stopAnimating()
+                    self.loadQuestions()
+            
+        }
+    }
     func buttonClicked(_ sender:UIButton) {
+        
         result = (sender.titleLabel?.text!)!
         mySingleObject.resultArray.append(result)
-        if (result == mySingleObject.questionList[indexOfQuestion].correctAnswer as! String){
+        if (result == mySingleObject.questionList[indexOfQuestion].correctAnswer ){
             correct+=1
         }
         clearView()
@@ -73,6 +106,7 @@ class ViewController: UIViewController, GoBackDelegate {
     func goBack() {
         loadQuestions()
     }
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

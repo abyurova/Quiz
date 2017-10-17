@@ -15,7 +15,7 @@ class Quiz :NSObject
     var resultArray = [String]()
     
     override init() {
-        let questionOne = Question(questionText: "2+2?", choiceList: ["2","4","5"], correctAnswer : "4")
+      /*  let questionOne = Question(questionText: "2+2?", choiceList: ["2","4","5"], correctAnswer : "4")
         let questionTwo = Question(questionText: "2+3?", choiceList: ["2","5","6"], correctAnswer : "5")
         let questionThree = Question(questionText: "2+6?", choiceList: ["2","5","6"], correctAnswer : "6")
         let questionFour = Question(questionText: "10+4?", choiceList: ["20","18","14"], correctAnswer : "14")
@@ -30,7 +30,7 @@ class Quiz :NSObject
             let randomNum = Int(arc4random_uniform(9))
             questionList.append(arrayOfQuestions[randomNum])
         }
-        
+        */
         
     }
     
